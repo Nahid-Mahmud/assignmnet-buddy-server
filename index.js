@@ -40,15 +40,24 @@ async function run() {
     // get related api
     // all assignment
     app.get("/allAssignment", async (req, res) => {
-      const result = await assignmentCollection.find().toArray();
-      res.send(result);
+      console.log(req.query.status);
+      if (req.query.status === "All") {
+        const result = await assignmentCollection.find().toArray();
+        res.send(result);
+      }
+
+      if (req.query.status !== "All") {
+        const query = { difficulty: req.query.status };
+        const result = await assignmentCollection.find(query).toArray();
+        res.send(result);
+      }
     });
     // get spesific user data
     app.get("/allAssignment/user", async (req, res) => {
       // const query = req.query;
-      let query = {}
-      if(req.query.email){
-       query = { createdBy: req.query.email };
+      let query = {};
+      if (req.query.email) {
+        query = { createdBy: req.query.email };
       }
       const result = await assignmentCollection.find(query).toArray();
       console.log(query);
