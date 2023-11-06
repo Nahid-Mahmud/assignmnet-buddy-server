@@ -16,7 +16,6 @@ app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_Pass}@cluster0.htztern.mongodb.net/?retryWrites=true&w=majority`;
 
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -33,9 +32,18 @@ async function run() {
 
     // My code here starts
 
-    
+    //database collections
+    const assignmentCollection = client
+      .db("assignmentDb")
+      .collection("allassignment");
 
-
+    // assignmet related post apis
+    app.post("/addAssignment", async (req, res) => {
+      const assignment = req.body;
+      // console.log(assignment);
+      const result = await assignmentCollection.insertOne(assignment);
+      res.json(result);
+    });
 
     // My code here ends
 
@@ -52,7 +60,9 @@ async function run() {
 run().catch(console.dir);
 
 // mongo db codes end
-
+app.get("/", (req, res) => {
+  res.send("Assignmet Buddy Server is running");
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
