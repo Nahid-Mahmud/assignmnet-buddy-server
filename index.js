@@ -38,9 +38,9 @@ async function run() {
       .collection("allassignment");
 
     // get related api
-    // all assignment
+    //  assignment based on dificulty query
     app.get("/allAssignment", async (req, res) => {
-      console.log(req.query.status);
+      // console.log(req.query.status);
       if (req.query.status === "All") {
         const result = await assignmentCollection.find().toArray();
         res.send(result);
@@ -52,7 +52,7 @@ async function run() {
         res.send(result);
       }
     });
-    // get spesific user data
+    // get spesific user data using email
     app.get("/allAssignment/user", async (req, res) => {
       // const query = req.query;
       let query = {};
@@ -64,12 +64,48 @@ async function run() {
       res.send(result);
     });
 
+    // get single assignment data
+
+    app.get("/assignment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentCollection.findOne(query);
+      res.send(result);
+      // console.log(id);
+    });
+
     // assignmet related post apis
     app.post("/addAssignment", async (req, res) => {
       const assignment = req.body;
       // console.log(assignment);
       const result = await assignmentCollection.insertOne(assignment);
       res.json(result);
+    });
+
+    // put methods
+    app.put("/addAssignment/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedAssignmentData = req.body;
+      const updateAssignment = {
+        $set: {
+          assignmentTitle: updatedAssignmentData.assignmentTitle,
+          thumbnailUrl: updatedAssignmentData.thumbnailUrl,
+          dueDate: updatedAssignmentData.dueDate,
+          dificulty: updatedAssignmentData.dificulty,
+          mark: updatedAssignmentData.mark,
+          description: updatedAssignmentData.description,
+          createdBy: updatedAssignmentData.createdBy,
+        },
+      };
+      console.log(updatedAssignmentData);
+      const result = await assignmentCollection.updateOne(
+        filter,
+        updateAssignment,
+        options
+      );
+      res.send(result);
     });
 
     // My code here ends
