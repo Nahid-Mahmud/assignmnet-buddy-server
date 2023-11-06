@@ -37,6 +37,24 @@ async function run() {
       .db("assignmentDb")
       .collection("allassignment");
 
+    // get related api
+    // all assignment
+    app.get("/allAssignment", async (req, res) => {
+      const result = await assignmentCollection.find().toArray();
+      res.send(result);
+    });
+    // get spesific user data
+    app.get("/allAssignment/user", async (req, res) => {
+      // const query = req.query;
+      let query = {}
+      if(req.query.email){
+       query = { createdBy: req.query.email };
+      }
+      const result = await assignmentCollection.find(query).toArray();
+      console.log(query);
+      res.send(result);
+    });
+
     // assignmet related post apis
     app.post("/addAssignment", async (req, res) => {
       const assignment = req.body;
