@@ -77,6 +77,21 @@ async function run() {
       // console.log(id);
     });
 
+    // get signle submitted assignment data
+    app.get("/assignment/submitted/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await submiteedAssignmentCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get all submitted assignment
+
+    app.get("/submittedAssignment", async (req, res) => {
+      const result = await submiteedAssignmentCollection.find().toArray();
+      res.send(result);
+    });
+
     // assignmet related post apis
 
     // all assignment post
