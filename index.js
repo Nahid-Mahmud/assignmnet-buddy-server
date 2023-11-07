@@ -36,6 +36,9 @@ async function run() {
     const assignmentCollection = client
       .db("assignmentDb")
       .collection("allassignment");
+    const submiteedAssignmentCollection = client
+      .db("assignmentDb")
+      .collection("submittedAssignment");
 
     // get related api
     //  assignment based on dificulty query
@@ -75,11 +78,21 @@ async function run() {
     });
 
     // assignmet related post apis
+
+    // all assignment post
     app.post("/addAssignment", async (req, res) => {
       const assignment = req.body;
       // console.log(assignment);
       const result = await assignmentCollection.insertOne(assignment);
       res.json(result);
+    });
+
+    // submitted assignment post
+    app.post("/submittedAssignment", async (req, res) => {
+      const submission = req.body;
+      // console.log(submission);
+      const result = await submiteedAssignmentCollection.insertOne(submission);
+      res.send(result);
     });
 
     // put methods
