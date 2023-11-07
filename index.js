@@ -43,15 +43,17 @@ async function run() {
     // get related api
     //  assignment based on dificulty query
     app.get("/allAssignment", async (req, res) => {
-      console.log(req.query);
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      console.log(page,size);
       if (req.query.status === "All") {
-        const result = await assignmentCollection.find().toArray();
+        const result = await assignmentCollection.find().skip(page * size).limit(size).toArray();
         res.send(result);
       }
 
       if (req.query.status !== "All") {
         const query = { difficulty: req.query.status };
-        const result = await assignmentCollection.find(query).toArray();
+        const result = await assignmentCollection.find(query).skip(page*size).limit(size).toArray();
         res.send(result);
       }
     });
