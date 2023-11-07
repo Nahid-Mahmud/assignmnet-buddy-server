@@ -43,7 +43,7 @@ async function run() {
     // get related api
     //  assignment based on dificulty query
     app.get("/allAssignment", async (req, res) => {
-      // console.log(req.query.status);
+      console.log(req.query);
       if (req.query.status === "All") {
         const result = await assignmentCollection.find().toArray();
         res.send(result);
@@ -91,6 +91,13 @@ async function run() {
     app.get("/submittedAssignment", async (req, res) => {
       const result = await submiteedAssignmentCollection.find().toArray();
       res.send(result);
+    });
+
+    // get assignment count
+    app.get("/assignment-count", async (req, res) => {
+      const assignmentCount =
+        await assignmentCollection.estimatedDocumentCount();
+      res.send({ assignmentCount });
     });
 
     // assignmet related post apis
