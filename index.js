@@ -156,6 +156,14 @@ async function run() {
       res.send(result);
     });
 
+    // delleate methods
+    app.delete("/deleteAssignment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // My code here ends
 
     // Send a ping to confirm a successful connection
