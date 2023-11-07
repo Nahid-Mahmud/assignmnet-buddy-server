@@ -80,6 +80,7 @@ async function run() {
     // get signle submitted assignment data
     app.get("/assignment/submitted/:id", async (req, res) => {
       const id = req.params.id;
+      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await submiteedAssignmentCollection.findOne(query);
       res.send(result);
@@ -132,6 +133,25 @@ async function run() {
         filter,
         updateAssignment,
         options
+      );
+      res.send(result);
+    });
+
+    // pathc methods
+    app.patch("/markAssignment/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const markData = req.body;
+      const updateData = {
+        $set: {
+          givenMark: markData.givenMark,
+          feedback: markData.feedback,
+          status: markData.status,
+        },
+      };
+      const result = await submiteedAssignmentCollection.updateOne(
+        filter,
+        updateData
       );
       res.send(result);
     });
