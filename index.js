@@ -8,7 +8,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173/"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -32,6 +37,12 @@ async function run() {
 
     // My code here starts
 
+    // auth related api
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+    });
+
     //database collections
     const assignmentCollection = client
       .db("assignmentDb")
@@ -45,15 +56,23 @@ async function run() {
     app.get("/allAssignment", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
-      console.log(page,size);
+      console.log(page, size);
       if (req.query.status === "All") {
-        const result = await assignmentCollection.find().skip(page * size).limit(size).toArray();
+        const result = await assignmentCollection
+          .find()
+          .skip(page * size)
+          .limit(size)
+          .toArray();
         res.send(result);
       }
 
       if (req.query.status !== "All") {
         const query = { difficulty: req.query.status };
-        const result = await assignmentCollection.find(query).skip(page*size).limit(size).toArray();
+        const result = await assignmentCollection
+          .find(query)
+          .skip(page * size)
+          .limit(size)
+          .toArray();
         res.send(result);
       }
     });
