@@ -7,16 +7,40 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+const accessToken = process.env.ACCESS_TOKEN_SECRET;
+// console.log(accessToken);
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173/"],
+    origin: ["http://localhost:5173", "http://localhost:4173"],
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
 
+// create custom middleware to check the jwt token
+
+const veryfyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  // console.log(token);
+  // console.log("token in middleware", token);
+  if (!token) {
+    return res.status(401).send({ message: "no token access" });
+  }
+  jwt.verify(token, accessToken, (error, decoded) => {
+    if (error) {
+      return res
+        .status(401)
+        .send({ message: "verrify secton error block access" });
+    }
+    req.user = decoded;
+    console.log("request.user", req.user);
+    next();
+  });
+};
+
+// app.use(veryfyToken)
 // mongo db codes start
 
 const uri = `mongodb+srv://${process.env.DB_user}:${process.env.DB_Pass}@cluster0.htztern.mongodb.net/?retryWrites=true&w=majority`;
@@ -30,6 +54,24 @@ const client = new MongoClient(uri, {
   },
 });
 
+// // verify token
+
+// const verifyToken = (req, res, next) => {
+//   const token = req?.cookies?.token;
+//   // console.log('token in the middleware', token);
+//   // no token available
+//   if (!token) {
+//     return res.status(401).send({ message: "unauthorized access" });
+//   }
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res.status(401).send({ message: "unauthorized access" });
+//     }
+//     req.user = decoded;
+//     next();
+//   });
+// };
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -40,7 +82,18 @@ async function run() {
     // auth related api
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log(user);
+      // console.log(req.body);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
     });
 
     //database collections
@@ -56,7 +109,11 @@ async function run() {
     app.get("/allAssignment", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
-      console.log(page, size);
+      let query = {};
+      if (req.query.email) {
+        query = { createdBy: req.query.email };
+      }
+      // console.log(page, size);
       if (req.query.status === "All") {
         const result = await assignmentCollection
           .find()
@@ -67,7 +124,8 @@ async function run() {
       }
 
       if (req.query.status !== "All") {
-        const query = { difficulty: req.query.status };
+        query = { difficulty: req.query.status };
+        console.log(query);
         const result = await assignmentCollection
           .find(query)
           .skip(page * size)
@@ -84,7 +142,7 @@ async function run() {
         query = { createdBy: req.query.email };
       }
       const result = await assignmentCollection.find(query).toArray();
-      console.log(query);
+      // console.log(query);
       res.send(result);
     });
 
@@ -101,7 +159,7 @@ async function run() {
     // get signle submitted assignment data
     app.get("/assignment/submitted/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await submiteedAssignmentCollection.findOne(query);
       res.send(result);
@@ -109,8 +167,15 @@ async function run() {
 
     // get all submitted assignment
 
-    app.get("/submittedAssignment", async (req, res) => {
-      const result = await submiteedAssignmentCollection.find().toArray();
+    app.get("/submittedAssignment", veryfyToken, async (req, res) => {
+      let query = {};
+      console.log(req.query.email);
+      if (req.query.email) {
+        query = { submittedBy: req.query.email };
+        console.log("query form submitted ass", query);
+        // submittedBy
+      }
+      const result = await submiteedAssignmentCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -156,7 +221,7 @@ async function run() {
           createdBy: updatedAssignmentData.createdBy,
         },
       };
-      console.log(updatedAssignmentData);
+      // console.log(updatedAssignmentData);
       const result = await assignmentCollection.updateOne(
         filter,
         updateAssignment,
@@ -191,7 +256,12 @@ async function run() {
       const result = await assignmentCollection.deleteOne(query);
       res.send(result);
     });
-
+    app.delete("/deleteMysubmission/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await submiteedAssignmentCollection.deleteOne(query);
+      res.send(result);
+    });
     // My code here ends
 
     // Send a ping to confirm a successful connection
