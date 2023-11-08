@@ -100,6 +100,15 @@ async function run() {
         .send({ success: true });
     });
 
+    // logout api
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log("logging out", user);
+      res
+        .clearCookie("token", { maxAge: 0, secure: true, sameSite: "none" })
+        .send({ logout: true });
+    });
+
     //database collections
     const assignmentCollection = client
       .db("assignmentDb")
@@ -196,6 +205,9 @@ async function run() {
       const result = await assignmentCollection.insertOne(assignment);
       res.json(result);
     });
+
+
+
 
     // submitted assignment post
     app.post("/submittedAssignment", veryfyToken, async (req, res) => {
