@@ -169,10 +169,10 @@ async function run() {
 
     app.get("/submittedAssignment", veryfyToken, async (req, res) => {
       let query = {};
-      console.log(req.query.email);
+      // console.log(req.query.email);
       if (req.query.email) {
         query = { submittedBy: req.query.email };
-        console.log("query form submitted ass", query);
+        // console.log("query form submitted ass", query);
         // submittedBy
       }
       const result = await submiteedAssignmentCollection.find(query).toArray();
@@ -189,7 +189,7 @@ async function run() {
     // assignmet related post apis
 
     // all assignment post
-    app.post("/addAssignment", async (req, res) => {
+    app.post("/addAssignment", veryfyToken, async (req, res) => {
       const assignment = req.body;
       // console.log(assignment);
       const result = await assignmentCollection.insertOne(assignment);
@@ -197,7 +197,7 @@ async function run() {
     });
 
     // submitted assignment post
-    app.post("/submittedAssignment", async (req, res) => {
+    app.post("/submittedAssignment", veryfyToken, async (req, res) => {
       const submission = req.body;
       // console.log(submission);
       const result = await submiteedAssignmentCollection.insertOne(submission);
@@ -231,7 +231,7 @@ async function run() {
     });
 
     // pathc methods
-    app.patch("/markAssignment/:id", async (req, res) => {
+    app.patch("/markAssignment/:id", veryfyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const markData = req.body;
