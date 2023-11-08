@@ -12,7 +12,11 @@ const accessToken = process.env.ACCESS_TOKEN_SECRET;
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:4173"],
+    origin: [
+      "http://localhost:5173",
+      // "http://localhost:4173",
+      "https://assignment-buddy.surge.sh",
+    ],
     credentials: true,
   })
 );
