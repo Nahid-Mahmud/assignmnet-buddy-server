@@ -113,10 +113,7 @@ async function run() {
     app.get("/allAssignment", async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
-      let query = {};
-      if (req.query.email) {
-        query = { createdBy: req.query.email };
-      }
+
       // console.log(page, size);
       if (req.query.status === "All") {
         const result = await assignmentCollection
@@ -128,7 +125,7 @@ async function run() {
       }
 
       if (req.query.status !== "All") {
-        query = { difficulty: req.query.status };
+        query = { dificulty: req.query.status };
         console.log(query);
         const result = await assignmentCollection
           .find(query)
